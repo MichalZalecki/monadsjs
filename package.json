@@ -1,0 +1,33 @@
+{
+  "name": "monadsjs",
+  "version": "0.0.0",
+  "description": "Set of ready to use monads with practical examples",
+  "main": "lib/monads.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified yet\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichalZalecki/monadsjs.git"
+  },
+  "keywords": [
+    "monad",
+    "monads",
+    "maybe",
+    "just",
+    "none",
+    "either",
+    "IO"
+  ],
+  "author": "Michal Zalecki <michal@michalzalecki.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MichalZalecki/monadsjs/issues"
+  },
+  "homepage": "https://github.com/MichalZalecki/monadsjs#readme"
+}
