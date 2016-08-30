@@ -295,43 +295,55 @@ test("Continuation obey monad laws", t => {
 
 // List
 
-test("List.unit creates lazy evaluated list (generator)", t => {
-  const actual = List.of([1, 2, 3]);
-
-  t.is(actual.next().value, 1);
-  t.is(actual.next().value, 2);
-  t.is(actual.next().value, 3);
-  t.true(actual.next().done);
+test("List.unit([a]) is new List([a]) shorthand", t => {
+  t.deepEqual(List.unit([1, 2, 3]), new List([1, 2, 3]));
 });
 
 test("List.of is an List.unit alias", t => {
   t.deepEqual(List.of([1, 2, 3]), List.unit([1, 2, 3]));
 });
 
-test("List.map allows for lazy list computation", t => {
-  const list = List.of([1, 2, 3]);
+test("List.bind allows for chaining iterable transformations", t => {
+  const actual = List.of([1, 2, 3])
+    .bind(iterable => List.of(Array.from(iterable).map(x => x + 1)))
+    .bind(iterable => List.of(Array.from(iterable).map(x => x + 1)));
+
+  t.deepEqual(actual, List.of([3, 4, 5]));
+});
+
+test("List.map allows for chaining items transformations and lazy computation", t => {
   const lazySpy = sinon.spy();
-
-  const lazyComputedList = List.map(list, function * (n) {
-    lazySpy(n);
-    yield n * 2;
-  });
-
   const nextLazySpy = sinon.spy();
-  const nextLazyComputedList = List.map(lazyComputedList, function * (n) {
-    nextLazySpy(n);
-    yield n * 0.9;
+
+  const m = List.of([1, 2, 3]).map(x => {
+    lazySpy();
+    return x + 1;
+  }).map(x => {
+    nextLazySpy();
+    return x + 1;
   });
+
+  const underlayingIterable = m[Symbol.iterator]();
 
   t.true(lazySpy.notCalled);
   t.true(nextLazySpy.notCalled);
-  t.is(nextLazyComputedList.next().value, 1.8);
+  t.is(underlayingIterable.next().value, 3);
   t.true(lazySpy.calledOnce);
   t.true(nextLazySpy.calledOnce);
-  t.is(nextLazyComputedList.next().value, 3.6);
+  t.is(underlayingIterable.next().value, 4);
   t.true(lazySpy.calledTwice);
   t.true(nextLazySpy.calledTwice);
-  t.is(nextLazyComputedList.next().value, 5.4);
+  t.is(underlayingIterable.next().value, 5);
   t.true(lazySpy.calledThrice);
   t.true(nextLazySpy.calledThrice);
+});
+
+test("List obey monad laws", t => {
+  const f = (iterable: Iterable<number>) => List.of(iterable);
+  const g = (iterable: Iterable<number>) => List.of(Array.from(iterable).map(x => x + 1));
+  const m = Just.of([1, 2, 3]);
+
+  t.deepEqual(List.of([1, 2, 3]).bind(f), f([1, 2, 3]));
+  t.deepEqual(m.bind(Just.of), m);
+  t.deepEqual(m.bind(f).bind(g), m.bind(x => f(x).bind(g)));
 });

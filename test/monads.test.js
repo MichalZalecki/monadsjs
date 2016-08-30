@@ -220,38 +220,47 @@ ava_1.default("Continuation obey monad laws", t => {
     t.deepEqual(m.bind(f).bind(g), m.bind(x => f(x).bind(g)));
 });
 // List
-ava_1.default("List.unit creates lazy evaluated list (generator)", t => {
-    const actual = monads_1.List.of([1, 2, 3]);
-    t.is(actual.next().value, 1);
-    t.is(actual.next().value, 2);
-    t.is(actual.next().value, 3);
-    t.true(actual.next().done);
+ava_1.default("List.unit([a]) is new List([a]) shorthand", t => {
+    t.deepEqual(monads_1.List.unit([1, 2, 3]), new monads_1.List([1, 2, 3]));
 });
 ava_1.default("List.of is an List.unit alias", t => {
     t.deepEqual(monads_1.List.of([1, 2, 3]), monads_1.List.unit([1, 2, 3]));
 });
-ava_1.default("List.map allows for lazy list computation", t => {
-    const list = monads_1.List.of([1, 2, 3]);
+ava_1.default("List.bind allows for chaining iterable transformations", t => {
+    const actual = monads_1.List.of([1, 2, 3])
+        .bind(iterable => monads_1.List.of(Array.from(iterable).map(x => x + 1)))
+        .bind(iterable => monads_1.List.of(Array.from(iterable).map(x => x + 1)));
+    t.deepEqual(actual, monads_1.List.of([3, 4, 5]));
+});
+ava_1.default("List.map allows for chaining items transformations and lazy computation", t => {
     const lazySpy = sinon.spy();
-    const lazyComputedList = monads_1.List.map(list, function* (n) {
-        lazySpy(n);
-        yield n * 2;
-    });
     const nextLazySpy = sinon.spy();
-    const nextLazyComputedList = monads_1.List.map(lazyComputedList, function* (n) {
-        nextLazySpy(n);
-        yield n * 0.9;
+    const m = monads_1.List.of([1, 2, 3]).map(x => {
+        lazySpy();
+        return x + 1;
+    }).map(x => {
+        nextLazySpy();
+        return x + 1;
     });
+    const underlayingIterable = m[Symbol.iterator]();
     t.true(lazySpy.notCalled);
     t.true(nextLazySpy.notCalled);
-    t.is(nextLazyComputedList.next().value, 1.8);
+    t.is(underlayingIterable.next().value, 3);
     t.true(lazySpy.calledOnce);
     t.true(nextLazySpy.calledOnce);
-    t.is(nextLazyComputedList.next().value, 3.6);
+    t.is(underlayingIterable.next().value, 4);
     t.true(lazySpy.calledTwice);
     t.true(nextLazySpy.calledTwice);
-    t.is(nextLazyComputedList.next().value, 5.4);
+    t.is(underlayingIterable.next().value, 5);
     t.true(lazySpy.calledThrice);
     t.true(nextLazySpy.calledThrice);
+});
+ava_1.default("List obey monad laws", t => {
+    const f = (iterable) => monads_1.List.of(iterable);
+    const g = (iterable) => monads_1.List.of(Array.from(iterable).map(x => x + 1));
+    const m = monads_1.Just.of([1, 2, 3]);
+    t.deepEqual(monads_1.List.of([1, 2, 3]).bind(f), f([1, 2, 3]));
+    t.deepEqual(m.bind(monads_1.Just.of), m);
+    t.deepEqual(m.bind(f).bind(g), m.bind(x => f(x).bind(g)));
 });
 //# sourceMappingURL=monads.test.js.map

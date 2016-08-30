@@ -56,8 +56,12 @@ export declare class Continuation {
     bind(transform: (value: any) => any): Continuation;
     toString(): string;
 }
-export declare class List {
+export declare class List<T> {
+    private _value;
     static of: typeof List.unit;
-    static unit<T>(list: Array<T>): IterableIterator<T>;
-    static map<T>(list: IterableIterator<T>, transform: (item: T) => any): IterableIterator<any>;
+    static unit<T>(value: Iterable<T>): List<T>;
+    constructor(_value: Iterable<T>);
+    bind<U>(transform: (iterable: Iterable<T>) => List<U>): List<U>;
+    map<U>(transform: (elem: T) => U): List<U>;
+    [Symbol.iterator](): IterableIterator<T>;
 }

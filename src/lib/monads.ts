@@ -137,18 +137,30 @@ export class Continuation {
   }
 }
 
-export class List {
+function *lazyMap<T, U>(iterable: Iterable<T>, transform: (elem: T) => U) {
+  for (let elem of iterable) {
+    yield transform(elem);
+  }
+}
+
+export class List<T> {
   public static of = List.unit;
 
-  public static *unit<T>(list: Array<T>) {
-    yield* list;
+  public static unit<T>(value: Iterable<T>) {
+    return new List<T>(value);
   }
 
-  // TODO: Implement bind
+  constructor(private _value: Iterable<T>) {}
 
-  public static *map<T>(list: IterableIterator<T>, transform: (item: T) => any) {
-    for (let item of list) {
-      yield* transform(item);
-    }
+  public bind<U>(transform: (iterable: Iterable<T>) => List<U>): List<U> {
+    return transform(this._value);
+  }
+
+  public map<U>(transform: (elem: T) => U): List<U> {
+    return List.of(lazyMap(this._value, transform));
+  }
+
+  public *[Symbol.iterator]() {
+    yield* this._value;
   }
 }
