@@ -163,4 +163,8 @@ export class List<T> {
   public *[Symbol.iterator]() {
     yield* this._value;
   }
+
+  public toString() {
+    return `List(${JSON.stringify(this._value)})`;
+  }
 }

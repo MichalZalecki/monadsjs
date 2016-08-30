@@ -255,6 +255,9 @@ ava_1.default("List.map allows for chaining items transformations and lazy compu
     t.true(lazySpy.calledThrice);
     t.true(nextLazySpy.calledThrice);
 });
+ava_1.default("List implements .toString() method", t => {
+    t.is(monads_1.List.of([1, 2, 3]).toString(), "List([1,2,3])");
+});
 ava_1.default("List obey monad laws", t => {
     const f = (iterable) => monads_1.List.of(iterable);
     const g = (iterable) => monads_1.List.of(Array.from(iterable).map(x => x + 1));

@@ -64,4 +64,5 @@ export declare class List<T> {
     bind<U>(transform: (iterable: Iterable<T>) => List<U>): List<U>;
     map<U>(transform: (elem: T) => U): List<U>;
     [Symbol.iterator](): IterableIterator<T>;
+    toString(): string;
 }

@@ -338,6 +338,10 @@ test("List.map allows for chaining items transformations and lazy computation", 
   t.true(nextLazySpy.calledThrice);
 });
 
+test("List implements .toString() method", t => {
+  t.is(List.of([1, 2, 3]).toString(), "List([1,2,3])");
+});
+
 test("List obey monad laws", t => {
   const f = (iterable: Iterable<number>) => List.of(iterable);
   const g = (iterable: Iterable<number>) => List.of(Array.from(iterable).map(x => x + 1));
