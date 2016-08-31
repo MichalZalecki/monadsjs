@@ -182,7 +182,7 @@ assert(nextLazySpy.notCalled);
 
 assert(asIterable.next().value === 3);
 
-// only first value was computated
+// only first value was computed
 
 assert(lazySpy.calledOnce);
 assert(nextLazySpy.calledOnce);
