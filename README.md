@@ -195,3 +195,27 @@ assert(asIterable.next().value === 5);
 assert(lazySpy.calledThrice);
 assert(nextLazySpy.calledThrice);
 ```
+
+## Monads next
+
+*Monad next* is a bit different approach to implementing monads in JavaScript. It requires `::` bind
+operator wich is not yet supported in TypeScript and having types when implemening monads is more
+important for me at this very moment.
+
+```js
+const List = {
+  *unit(iterable) {
+    yield* iterable;
+  },
+
+  *bind(fn) {
+    for (let x of this) {
+      yield fn(x);
+    }
+  }
+};
+
+const m = List.unit([1, 2, 3])::List.bind(x => x + 1)::List.bind(x => x + 1);
+```
+
+[Check it live](https://jsfiddle.net/d0r43hnL/2/).
