@@ -170,16 +170,26 @@ test("IO.bind allows for chaining side effects", t => {
 });
 
 test("IO implements .toString() method", t => {
-  const sideEffect: IOSideEffect = () => { alert("I'm a side effect!"); };
+  const sideEffect: IOSideEffect = name => { alert(`Hello ${name}! I'm a side effect!`); };
 
-  t.is(IO.of(sideEffect).toString(), "IO(IOSideEffect)");
+  t.is(IO.of(sideEffect, "World").toString(), "IO(sideEffect, [\"World\"])");
+});
+
+test("IO.equals check IO monads deep quality", t => {
+  const sideEffect = () => { alert("I'm a side effect!"); };
+  const anotherSideEffect = () => { alert("I'm a another side effect!"); };
+  const m1 = IO.unit(sideEffect, 1, 2, 3);
+
+  t.true(m1.equals(IO.unit(sideEffect, 1, 2, 3)));
+  t.false(m1.equals(IO.unit(sideEffect, 1, 2)));
+  t.false(m1.equals(IO.unit(anotherSideEffect, 1, 2, 3)));
 });
 
 test("IO can run() side effect", t => {
   const sideEffectSpy = sinon.spy();
 
-  IO.of(sideEffectSpy).run();
-  t.true(sideEffectSpy.called);
+  IO.of(sideEffectSpy, 101).run();
+  t.true(sideEffectSpy.calledWith(101));
 });
 
 test("IO obey monad laws", t => {
@@ -302,7 +312,7 @@ test("Either when it's Left skips chained transformations", t => {
 
 // Continuation
 
-test("Continuation.unit(a) is new Left(a) shorthand", t => {
+test("Continuation.unit(a) is new Continuation(a) shorthand", t => {
   t.deepEqual(Continuation.unit("foo"), new Continuation("foo"));
 });
 
@@ -384,6 +394,25 @@ test("List.map allows for chaining items transformations and lazy computation", 
   t.is(underlayingIterable.next().value, 5);
   t.true(lazySpy.calledThrice);
   t.true(nextLazySpy.calledThrice);
+});
+
+test("List.forEach allows for performing computation and iterate through the result", t => {
+  const actual: number[] = [];
+  const expected = [1, 2, 3];
+  List.unit([1, 2, 3]).forEach(item => {
+    actual.push(item);
+  });
+
+  t.deepEqual(actual, expected);
+});
+
+test("List implements Symbol.iterate", t => {
+  const actual: number[] = [];
+  const expected = [1, 2, 3];
+  for (let item of List.unit([1, 2, 3])) {
+    actual.push(item);
+  }
+  t.deepEqual(actual, expected);
 });
 
 test("List implements .toString() method", t => {

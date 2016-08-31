@@ -2,6 +2,7 @@
   "name": "monadsjs",
   "dependencies": {},
   "globalDependencies": {
+    "deep-equal": "registry:dt/deep-equal#0.0.0+20160316155526",
     "sinon": "registry:dt/sinon#1.16.0+20160517064723"
   }
 }

@@ -120,13 +120,21 @@ ava_1.default("IO.bind allows for chaining side effects", t => {
     t.deepEqual(actual, monads_1.IO.of(anotherSideEffect));
 });
 ava_1.default("IO implements .toString() method", t => {
+    const sideEffect = name => { alert(`Hello ${name}! I'm a side effect!`); };
+    t.is(monads_1.IO.of(sideEffect, "World").toString(), "IO(sideEffect, [\"World\"])");
+});
+ava_1.default("IO.equals check IO monads deep quality", t => {
     const sideEffect = () => { alert("I'm a side effect!"); };
-    t.is(monads_1.IO.of(sideEffect).toString(), "IO(IOSideEffect)");
+    const anotherSideEffect = () => { alert("I'm a another side effect!"); };
+    const m1 = monads_1.IO.unit(sideEffect, 1, 2, 3);
+    t.true(m1.equals(monads_1.IO.unit(sideEffect, 1, 2, 3)));
+    t.false(m1.equals(monads_1.IO.unit(sideEffect, 1, 2)));
+    t.false(m1.equals(monads_1.IO.unit(anotherSideEffect, 1, 2, 3)));
 });
 ava_1.default("IO can run() side effect", t => {
     const sideEffectSpy = sinon.spy();
-    monads_1.IO.of(sideEffectSpy).run();
-    t.true(sideEffectSpy.called);
+    monads_1.IO.of(sideEffectSpy, 101).run();
+    t.true(sideEffectSpy.calledWith(101));
 });
 ava_1.default("IO obey monad laws", t => {
     const sideEffect = () => { alert("I'm a side effect!"); };
@@ -223,7 +231,7 @@ ava_1.default("Either when it's Left skips chained transformations", t => {
     t.is(monad.toString(), "Left(SyntaxError: Unexpected string in JSON at position 7)");
 });
 // Continuation
-ava_1.default("Continuation.unit(a) is new Left(a) shorthand", t => {
+ava_1.default("Continuation.unit(a) is new Continuation(a) shorthand", t => {
     t.deepEqual(monads_1.Continuation.unit("foo"), new monads_1.Continuation("foo"));
 });
 ava_1.default("Continuation.of is an Continuation.unit alias", t => {
@@ -289,6 +297,22 @@ ava_1.default("List.map allows for chaining items transformations and lazy compu
     t.is(underlayingIterable.next().value, 5);
     t.true(lazySpy.calledThrice);
     t.true(nextLazySpy.calledThrice);
+});
+ava_1.default("List.forEach allows for performing computation and iterate through the result", t => {
+    const actual = [];
+    const expected = [1, 2, 3];
+    monads_1.List.unit([1, 2, 3]).forEach(item => {
+        actual.push(item);
+    });
+    t.deepEqual(actual, expected);
+});
+ava_1.default("List implements Symbol.iterate", t => {
+    const actual = [];
+    const expected = [1, 2, 3];
+    for (let item of monads_1.List.unit([1, 2, 3])) {
+        actual.push(item);
+    }
+    t.deepEqual(actual, expected);
 });
 ava_1.default("List implements .toString() method", t => {
     t.is(monads_1.List.of([1, 2, 3]).toString(), "List([1,2,3])");

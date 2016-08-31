@@ -1,3 +1,5 @@
+import * as deepEqual from "deep-equal";
+
 export class Identity<T> {
   public static of = Identity.unit;
 
@@ -72,31 +74,6 @@ export class Nothing {
 
 export type Maybe<T> = Just<T> | Nothing;
 
-export type IOSideEffect = () => void;
-
-export class IO {
-  public static of = IO.unit;
-
-  public static unit(value: IOSideEffect) {
-    return new IO(value);
-  }
-
-  constructor(private _value: IOSideEffect) {}
-
-  public bind(transform: (value: IOSideEffect) => IO): IO {
-    return transform(this._value);
-  }
-
-  public run() {
-    this._value();
-  }
-
-  public toString() {
-    // TODO: Come up with sth better
-    return "IO(IOSideEffect)";
-  }
-}
-
 export class Right<T> {
   public static of = Right.unit;
 
@@ -151,6 +128,39 @@ export class Left<T> {
 
 export type Either<T> = Right<T> | Left<T>
 
+export type IOSideEffect = (...params: any[]) => void;
+
+export class IO {
+  public static of = IO.unit;
+
+  public static unit(effect: IOSideEffect, ...params: any[]) {
+    return new IO(effect, ...params);
+  }
+
+  public _params: any[];
+
+  constructor(public _effect: IOSideEffect, ..._params: any[]) {
+    this._params = _params;
+  }
+
+  public bind(transform: (effect: IOSideEffect, ...params: any[]) => IO): IO {
+    return transform(this._effect, ...this._params);
+  }
+
+  public run() {
+    this._effect(...this._params);
+  }
+
+  public equals(io: IO) {
+    return deepEqual([this._effect, this._params], [io._effect, io._params]);
+  }
+
+  public toString() {
+    // TODO: Come up with sth better
+    return `IO(${this._effect.name}, ${JSON.stringify(this._params)})`;
+  }
+}
+
 export class Continuation {
   public static of = Continuation.unit;
 
@@ -196,7 +206,11 @@ export class List<T> {
     return List.of(lazyMap(this._value, transform));
   }
 
-  // TODO: Implement forEach
+  public forEach(subscribe: (elem: T) => void): void {
+    for (let elem of this._value) {
+      subscribe(elem);
+    }
+  }
 
   public *[Symbol.iterator]() {
     yield* this._value;

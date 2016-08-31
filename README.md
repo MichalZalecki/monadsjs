@@ -2,8 +2,6 @@
 
 [![Build Status](https://travis-ci.org/MichalZalecki/monadsjs.svg?branch=master)](https://travis-ci.org/MichalZalecki/monadsjs)
 
-Examples are on their way. For now, check [tests](src/test/monads.test.ts).
-
 ## Installation
 
 ```
@@ -11,6 +9,8 @@ npm install --save monadsjs
 ```
 
 ## Monads
+
+Don't forget to check [tests](src/test/monads.test.ts).
 
 ### Identity
 
@@ -73,8 +73,125 @@ Just.unit([])
 
 ### Either (Left | Right)
 
+Either monad is almost like a Maybe monad. `Right` and `Just` are basically the same. Either unlike
+Maybe doesn't have monadic zero. `Left` is suppose to wrap `Error`. `Left` can be explicity
+returned from function passed to bind or when error occures. In this particular implementation
+Either is just a union type which will exists only if you are using TypeScript. In the following
+example `double` is not going to be called due to `TypeError` throwed in `firstWordLength`
+when empty array is passed.
+
+```js
+// Right.unit :: a -> Right a
+// Right.bind :: (a -> Right b | Left b) -> Right b | Left b
+// Right.map  :: (a -> b) -> Right b | Left b
+
+Right.unit("Monads are awesome!")
+  .bind(str => Right.unit(str.split(" ")))
+  .map((words: string[]) => words.length);
+
+  // Right(3)
+```
+
+```js
+// Left.unit :: a -> Left a
+// Left.bind :: (a -> Right b | Left b) -> Left a
+// Left.map  :: (a -> b) -> Left a
+
+const firstWordLength = words => words[0].length;
+const double = n => n * 2;
+
+Right.unit([])
+  .bind(strs => Right.unit(firstWordLength(strs)))
+  .map(double);
+
+  // Left(TypeError: Cannot read property 'length' of undefined)
+```
+
 ### IO
 
-### Promise
+IO monad was invented to make it possible to perform side effects in pure functional languages
+(here I have Haskell in mind). In JavaScript we can take an advantage of IO monads to change unpure
+functions into pure which makes them easy to test. `IO.equals` makes it easy to deep compare two IO
+monads.
+
+```js
+// IO.unit :: (a, ...) -> IO a, [...]
+// IO.bind :: ((a, ...) -> IO) -> IO a, [...]
+// IO.run  :: () -> void
+
+function sayHello(name) {
+  return IO.unit(alert, `Hello ${name}!`);
+}
+
+const m = sayHello("World"); // IO(sayHello, ["World"])
+
+assert(m.equals(IO.unit(alert, "Hello World!"))); // passes
+
+m.run(); // alerts: Hello World!
+```
+
+### Continuation (Promise)
+
+Promise out of the box is a grate Continuation monad implementation! `Promise.resolve` corresponds
+to `unit` and `Promise.then` corresponds to `bind`. Provided Continuation implementation is a minimal
+wrapper for Promise with methods you know from other monads (`bind` and `unit`). Don't use it, use
+Promise.
+
+```js
+// Continuation.unit :: a -> Continuation a
+// Continuation.bind :: (a -> b) -> Continuation b
+
+Continuation.unit(fetch("https://api.github.com/users/octocat"))
+  .bind(response => response.json());
+
+  // Continuation(<Promise>{ "login": "octocat", "id": ... })
+```
 
 ### List
+
+List monad is a clever one. List constructor accepts `Iterable` and allows for lazy transformations.
+It is achieved using generators. What is more, List implements `Symbol.iterator` so you can iterate
+through it like aby regular iterator.
+
+```js
+// List.unit    :: a -> List a
+// List.bind    :: (a -> List b) -> List b
+// List.map     :: (a -> b) -> List b
+// List.forEach :: (a -> void) -> void
+
+const lazySpy = sinon.spy();
+const nextLazySpy = sinon.spy();
+
+const m = List.of([1, 2, 3])
+  .map(x => {
+    lazySpy();
+    return x + 1;
+  }).map(x => {
+    nextLazySpy();
+    return x + 1;
+  });
+
+  // List([object Generator])
+
+const asIterable = m[Symbol.iterator]();
+
+// no computation was done so far
+
+assert(lazySpy.notCalled);
+assert(nextLazySpy.notCalled);
+
+assert(asIterable.next().value === 3);
+
+// only first value was computated
+
+assert(lazySpy.calledOnce);
+assert(nextLazySpy.calledOnce);
+
+assert(asIterable.next().value === 4);
+assert(lazySpy.calledTwice);
+assert(nextLazySpy.calledTwice);
+
+assert(asIterable.next().value === 5);
+assert(lazySpy.calledThrice);
+assert(nextLazySpy.calledThrice);
+```

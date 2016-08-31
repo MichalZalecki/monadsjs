@@ -1,12 +1,14 @@
 {
   "name": "monadsjs",
   "version": "0.0.0",
-  "description": "Set of ready to use monads with practical examples",
+  "description": "Ready to use monads in examples",
   "main": "lib/monads.js",
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "deep-equal": "^1.0.1"
+  },
   "devDependencies": {
     "ava": "^0.16.0",
     "sinon": "^1.17.5",
@@ -19,7 +21,8 @@
     "build:watch": "tsc -w",
     "clean": "rm -rf doc lib test",
     "lint": "tslint src/lib/* src/test/*",
-    "test": "ava --verbose"
+    "test": "ava --verbose",
+    "test:watch": "ava --verbose --watch"
   },
   "repository": {
     "type": "git",
