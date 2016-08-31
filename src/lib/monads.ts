@@ -11,6 +11,10 @@ export class Identity<T> {
     return transform(this._value);
   }
 
+  public map<U>(transform: (value: T) => U): Identity<U> {
+    return Identity.unit(transform(this._value));
+  }
+
   public toString() {
     return `Identity(${JSON.stringify(this._value)})`;
   }
@@ -26,7 +30,19 @@ export class Just<T> {
   constructor(private _value: T) {}
 
   public bind<U>(transform: (value: T) => Just<U> | Nothing): Just<U> | Nothing {
-    return transform(this._value);
+    try {
+      return transform(this._value);
+    } catch (err) {
+      return new Nothing();
+    }
+  }
+
+  public map<U>(transform: (value: T) => U): Just<U> | Nothing {
+    try {
+      return Just.unit(transform(this._value));
+    } catch (err) {
+      return new Nothing();
+    }
   }
 
   public toString() {
@@ -42,6 +58,10 @@ export class Nothing {
   }
 
   public bind<U>(transform: (value: any) => Just<U> | Nothing): Nothing {
+    return this;
+  }
+
+  public map<U>(transform: (value: any) => U): Nothing {
     return this;
   }
 
@@ -87,7 +107,19 @@ export class Right<T> {
   constructor(private _value: T) {}
 
   public bind<U>(transform: (value: T) => Right<U> | Left<U>): Right<U> | Left<U> {
-    return transform(this._value);
+    try {
+      return transform(this._value);
+    } catch (err) {
+      return Left.unit(err);
+    }
+  }
+
+  public map<U>(transform: (value: T) => U): Right<U> | Left<U> {
+    try {
+      return Right.unit(transform(this._value));
+    } catch (err) {
+      return Left.unit(err);
+    }
   }
 
   public toString() {
@@ -105,6 +137,10 @@ export class Left<T> {
   constructor(private _value: T) {}
 
   public bind<U>(transform: (value: T) => Right<U> | Left<U>): Left<T> {
+    return this;
+  }
+
+  public map<U>(transform: (value: T) => U): Left<T> {
     return this;
   }
 
@@ -159,6 +195,8 @@ export class List<T> {
   public map<U>(transform: (elem: T) => U): List<U> {
     return List.of(lazyMap(this._value, transform));
   }
+
+  // TODO: Implement forEach
 
   public *[Symbol.iterator]() {
     yield* this._value;

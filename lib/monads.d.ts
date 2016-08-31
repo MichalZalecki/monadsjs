@@ -4,6 +4,7 @@ export declare class Identity<T> {
     static unit<T>(value: T): Identity<T>;
     constructor(_value: T);
     bind<U>(transform: (value: T) => Identity<U>): Identity<U>;
+    map<U>(transform: (value: T) => U): Identity<U>;
     toString(): string;
 }
 export declare class Just<T> {
@@ -12,12 +13,14 @@ export declare class Just<T> {
     static unit<T>(value: T): Just<T>;
     constructor(_value: T);
     bind<U>(transform: (value: T) => Just<U> | Nothing): Just<U> | Nothing;
+    map<U>(transform: (value: T) => U): Just<U> | Nothing;
     toString(): string;
 }
 export declare class Nothing {
     static of: typeof Nothing.unit;
     static unit(): Nothing;
     bind<U>(transform: (value: any) => Just<U> | Nothing): Nothing;
+    map<U>(transform: (value: any) => U): Nothing;
     toString(): string;
 }
 export declare type Maybe<T> = Just<T> | Nothing;
@@ -37,6 +40,7 @@ export declare class Right<T> {
     static unit<T>(value: T): Right<T>;
     constructor(_value: T);
     bind<U>(transform: (value: T) => Right<U> | Left<U>): Right<U> | Left<U>;
+    map<U>(transform: (value: T) => U): Right<U> | Left<U>;
     toString(): string;
 }
 export declare class Left<T> {
@@ -45,6 +49,7 @@ export declare class Left<T> {
     static unit<T>(value: T): Left<T>;
     constructor(_value: T);
     bind<U>(transform: (value: T) => Right<U> | Left<U>): Left<T>;
+    map<U>(transform: (value: T) => U): Left<T>;
     toString(): string;
 }
 export declare type Either<T> = Right<T> | Left<T>;

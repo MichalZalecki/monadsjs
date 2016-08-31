@@ -32,6 +32,14 @@ test("Identity.bind allows for chaining transformations", t => {
   t.deepEqual(actual, Identity.of(6));
 });
 
+test("Identity.map allows for chaining underlaying value transformations", t => {
+  const actual = Identity.of("foo")
+    .map(str => str.length)
+    .map(len => len * 2);
+
+  t.deepEqual(actual, Identity.of(6));
+});
+
 test("Identity implements .toString() method", t => {
   t.is(Identity.of(6).toString(), "Identity(6)");
   t.is(Identity.of("foo").toString(), "Identity(\"foo\")");
@@ -54,8 +62,26 @@ test("Just.unit(a) is new Just(a) shorthand", t => {
   t.deepEqual(Just.unit("foo"), new Just("foo"));
 });
 
-test("Just.of is an Just.unit alias", t => {
-  t.deepEqual(Just.of("foo"), Just.unit("foo"));
+test("Just.bind returns Nothing in case of exception", t => {
+  function firstWordLength(words: string[]) {
+    return words[0].length;
+  }
+
+  const m: Maybe<number> = Just.unit([])
+    .bind(strs => Just.unit(firstWordLength(strs)));
+
+  t.deepEqual(m, new Nothing());
+});
+
+test("Just.map returns Nothing in case of exception", t => {
+  function firstWordLength(words: string[]) {
+    return words[0].length;
+  }
+
+  const m: Maybe<number> = Just.unit([])
+    .map(strs => firstWordLength(strs));
+
+  t.deepEqual(m, new Nothing());
 });
 
 test("Just implements .toString() method", t => {
@@ -178,6 +204,28 @@ test("Right.unit(a) is new Right(a) shorthand", t => {
 
 test("Right.of is an Right.unit alias", t => {
   t.deepEqual(Right.of("foo"), Right.unit("foo"));
+});
+
+test("Right.bind returns Left in case of exception", t => {
+  function firstWordLength(words: string[]) {
+    return words[0].length;
+  }
+
+  const m: Either<number | TypeError> = Right.unit([])
+    .bind(strs => Right.of(firstWordLength(strs)));
+
+  t.deepEqual(m, Left.unit(new TypeError()));
+});
+
+test("Right.map returns Left in case of exception", t => {
+  function firstWordLength(words: string[]) {
+    return words[0].length;
+  }
+
+  const m: Either<number | TypeError> = Right.unit([])
+    .map(strs => firstWordLength(strs));
+
+  t.deepEqual(m, Left.unit(new TypeError()));
 });
 
 test("Right implements .toString() method", t => {
@@ -349,5 +397,8 @@ test("List obey monad laws", t => {
 
   t.deepEqual(List.of([1, 2, 3]).bind(f), f([1, 2, 3]));
   t.deepEqual(m.bind(Just.of), m);
-  t.deepEqual(m.bind(f).bind(g), m.bind(x => f(x).bind(g)));
+  t.deepEqual(
+    m.bind<Iterable<number>>(f).bind<Iterable<number>>(g),
+    m.bind<Iterable<number>>(x => f(x).bind(g))
+  );
 });

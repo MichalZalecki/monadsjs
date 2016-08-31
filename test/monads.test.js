@@ -15,6 +15,12 @@ ava_1.default("Identity.bind allows for chaining transformations", t => {
         .bind(len => monads_1.Identity.of(len * 2));
     t.deepEqual(actual, monads_1.Identity.of(6));
 });
+ava_1.default("Identity.map allows for chaining underlaying value transformations", t => {
+    const actual = monads_1.Identity.of("foo")
+        .map(str => str.length)
+        .map(len => len * 2);
+    t.deepEqual(actual, monads_1.Identity.of(6));
+});
 ava_1.default("Identity implements .toString() method", t => {
     t.is(monads_1.Identity.of(6).toString(), "Identity(6)");
     t.is(monads_1.Identity.of("foo").toString(), "Identity(\"foo\")");
@@ -32,8 +38,21 @@ ava_1.default("Identity obey monad laws", t => {
 ava_1.default("Just.unit(a) is new Just(a) shorthand", t => {
     t.deepEqual(monads_1.Just.unit("foo"), new monads_1.Just("foo"));
 });
-ava_1.default("Just.of is an Just.unit alias", t => {
-    t.deepEqual(monads_1.Just.of("foo"), monads_1.Just.unit("foo"));
+ava_1.default("Just.bind returns Nothing in case of exception", t => {
+    function firstWordLength(words) {
+        return words[0].length;
+    }
+    const m = monads_1.Just.unit([])
+        .bind(strs => monads_1.Just.unit(firstWordLength(strs)));
+    t.deepEqual(m, new monads_1.Nothing());
+});
+ava_1.default("Just.map returns Nothing in case of exception", t => {
+    function firstWordLength(words) {
+        return words[0].length;
+    }
+    const m = monads_1.Just.unit([])
+        .map(strs => firstWordLength(strs));
+    t.deepEqual(m, new monads_1.Nothing());
 });
 ava_1.default("Just implements .toString() method", t => {
     t.is("Just(6)", monads_1.Just.of(6).toString());
@@ -126,6 +145,22 @@ ava_1.default("Right.unit(a) is new Right(a) shorthand", t => {
 });
 ava_1.default("Right.of is an Right.unit alias", t => {
     t.deepEqual(monads_1.Right.of("foo"), monads_1.Right.unit("foo"));
+});
+ava_1.default("Right.bind returns Left in case of exception", t => {
+    function firstWordLength(words) {
+        return words[0].length;
+    }
+    const m = monads_1.Right.unit([])
+        .bind(strs => monads_1.Right.of(firstWordLength(strs)));
+    t.deepEqual(m, monads_1.Left.unit(new TypeError()));
+});
+ava_1.default("Right.map returns Left in case of exception", t => {
+    function firstWordLength(words) {
+        return words[0].length;
+    }
+    const m = monads_1.Right.unit([])
+        .map(strs => firstWordLength(strs));
+    t.deepEqual(m, monads_1.Left.unit(new TypeError()));
 });
 ava_1.default("Right implements .toString() method", t => {
     t.is("Right(6)", monads_1.Right.of(6).toString());
