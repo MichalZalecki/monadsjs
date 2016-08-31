@@ -35,7 +35,7 @@ Identity.unit("Monads are awesome!")
 Maybe monad represents a value (`Just`) or monadic zero (`Nothing`). It's very convinient way to just
 literally let your code fail. Instead of writing multiple checks and try-catches just check type of
 the value at the end of transformations chain. In this particular implementation Maybe is just a
-union type which will exists only if you are using TypeScript.
+union type which exists only if you are using TypeScript.
 
 Just wraps actual value.
 
@@ -74,9 +74,9 @@ Just.unit([])
 ### Either (Left | Right)
 
 Either monad is almost like a Maybe monad. `Right` and `Just` are basically the same. Either unlike
-Maybe doesn't have monadic zero. `Left` is suppose to wrap `Error`. `Left` can be explicity
+Maybe doesn't have monadic zero. `Left` is supposed to wrap `Error`. `Left` can be explicity
 returned from function passed to bind or when error occures. In this particular implementation
-Either is just a union type which will exists only if you are using TypeScript. In the following
+Either is just a union type which exists only if you are using TypeScript. In the following
 example `double` is not going to be called due to `TypeError` throwed in `firstWordLength`
 when empty array is passed.
 
@@ -151,7 +151,7 @@ Continuation.unit(fetch("https://api.github.com/users/octocat"))
 
 List monad is a clever one. List constructor accepts `Iterable` and allows for lazy transformations.
 It is achieved using generators. What is more, List implements `Symbol.iterator` so you can iterate
-through it like aby regular iterator.
+through it like any regular iterator.
 
 ```js
 // List.unit    :: a -> List a
@@ -199,8 +199,8 @@ assert(nextLazySpy.calledThrice);
 ## Monads next
 
 *Monad next* is a bit different approach to implementing monads in JavaScript. It requires `::` bind
-operator wich is not yet supported in TypeScript and having types when implemening monads is more
-important for me at this very moment.
+operator wich is not yet supported in TypeScript (shame on you TypeScript, ave Babel!) and having
+types when implemening monads is more important for me at this very moment.
 
 ```js
 const List = {
