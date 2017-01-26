@@ -32,8 +32,8 @@ Identity.unit("Monads are awesome!")
 
 ### Maybe (Just | Nothing)
 
-Maybe monad represents a value (`Just`) or monadic zero (`Nothing`). It's very convinient way to just
-literally let your code fail. Instead of writing multiple checks and try-catches just check type of
+Maybe monad represents a value (`Just`) or monadic zero (`Nothing`). It's very convinient way to
+literally, let your code fail. Instead of writing multiple checks and try-catches just check type of
 the value at the end of transformations chain. In this particular implementation Maybe is just a
 union type which exists only if you are using TypeScript.
 
@@ -58,8 +58,8 @@ throwed in `firstWordLength` when empty array is passed.
 
 ```js
 // Nothing.unit :: () -> Nothing
-// Nothing.bind :: (a -> Just b | Nothing) -> | Nothing
-// Nothing.map  :: (a -> b) -> | Nothing
+// Nothing.bind :: (a -> Just b | Nothing) -> Nothing
+// Nothing.map  :: (a -> b) -> Nothing
 
 const firstWordLength = words => words[0].length;
 const double = n => n * 2;
@@ -111,8 +111,9 @@ Right.unit([])
 
 IO monad was invented to make it possible to perform side effects in pure functional languages
 (here I have Haskell in mind). In JavaScript we can take an advantage of IO monads to change unpure
-functions into pure which makes them easy to test. `IO.equals` makes it easy to deep compare two IO
-monads.
+functions into pure which makes them easy to test. This implementation is also
+a [Setoid](https://github.com/hemanth/functional-programming-jargon#setoid). `IO.equals` makes it
+easy to deeply compare two IO monads.
 
 ```js
 // IO.unit :: (a, ...) -> IO a, [...]
@@ -132,7 +133,7 @@ m.run(); // alerts: Hello World!
 
 ### Continuation (Promise)
 
-Promise out of the box is a grate Continuation monad implementation! `Promise.resolve` corresponds
+Promise out of the box is a great Continuation monad implementation! `Promise.resolve` corresponds
 to `unit` and `Promise.then` corresponds to `bind`. Provided Continuation implementation is a minimal
 wrapper for Promise with methods you know from other monads (`bind` and `unit`). Don't use it, use
 Promise.
