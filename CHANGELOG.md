@@ -1,5 +1,14 @@
 # CHANGELOG
 
+# 0.0.3
+
+* Update README
+* Add shrinkwrap
+
+# 0.0.2
+
+* Fixed typo
+
 # 0.0.1
 
 * Add monads description to README
