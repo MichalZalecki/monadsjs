@@ -1,6 +1,6 @@
 {
   "name": "monadsjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Ready to use monads in examples",
   "main": "lib/monads.js",
   "directories": {
