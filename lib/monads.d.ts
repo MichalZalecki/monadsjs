@@ -1,10 +1,14 @@
-export declare class Identity<T> {
+export interface Comonad<T> {
+    extract(): T;
+}
+export declare class Identity<T> implements Comonad<T> {
     private _value;
     static of: typeof Identity.unit;
     static unit<T>(value: T): Identity<T>;
     constructor(_value: T);
     bind<U>(transform: (value: T) => Identity<U>): Identity<U>;
     map<U>(transform: (value: T) => U): Identity<U>;
+    extract(): T;
     toString(): string;
 }
 export declare class Just<T> {

@@ -40,6 +40,10 @@ test("Identity.map allows for chaining underlaying value transformations", t => 
   t.deepEqual(actual, Identity.of(6));
 });
 
+test("Identity implements Comonad", t => {
+  t.is(Identity.of("Comonad").extract(), "Comonad");
+});
+
 test("Identity implements .toString() method", t => {
   t.is(Identity.of(6).toString(), "Identity(6)");
   t.is(Identity.of("foo").toString(), "Identity(\"foo\")");
@@ -116,11 +120,11 @@ test("Nothing implements .toString() method", t => {
 
 test("Nothing obey monad laws", t => {
   const f = (word: string) => Just.of(word.length);
-  const f1 = (word: string) => new Nothing();
+  const f1 = (word: string) => Nothing.unit();
   const g = (len: number) => Just.of(len * 2);
-  const m = new Nothing();
+  const m = Nothing.unit();
 
-  t.deepEqual(new Nothing().bind(f1), f1("foo"));
+  t.deepEqual(Nothing.unit().bind(f1), f1("foo"));
   t.deepEqual(m.bind(Just.of), m);
   t.deepEqual(m.bind(f).bind(g), m.bind(x => f(x).bind(g)));
 });
@@ -422,12 +426,12 @@ test("List implements .toString() method", t => {
 test("List obey monad laws", t => {
   const f = (iterable: Iterable<number>) => List.of(iterable);
   const g = (iterable: Iterable<number>) => List.of(Array.from(iterable).map(x => x + 1));
-  const m = Just.of([1, 2, 3]);
+  const m = List.of([1, 2, 3]);
 
   t.deepEqual(List.of([1, 2, 3]).bind(f), f([1, 2, 3]));
-  t.deepEqual(m.bind(Just.of), m);
+  t.deepEqual(m.bind(List.of), m);
   t.deepEqual(
-    m.bind<Iterable<number>>(f).bind<Iterable<number>>(g),
-    m.bind<Iterable<number>>(x => f(x).bind(g))
+    m.bind(f).bind(g),
+    m.bind(x => f(x).bind(g))
   );
 });

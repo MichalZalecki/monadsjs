@@ -18,16 +18,18 @@ It's the most basic monad implementation which only wraps a value. It doesn't ma
 use this monad as is. Understanding Identity monad is quite crucial to move forward. It can be a
 starting point for any new monad.
 
+Identity is also a `Comonad` implementation.
+
 ```js
-// Identity.unit :: a -> M a
-// Identity.bind :: (a -> M b) -> M b
-// Identity.map  :: (a -> b) -> M b
+// Identity.unit    :: a -> M a
+// Identity.bind    :: (a -> M b) -> M b
+// Identity.map     :: (a -> b) -> M b
+// Identity.extract :: () -> a
 
-Identity.unit("Monads are awesome!")
-  .bind(str => Identity.unit(str.split(" ")))
-  .map(words => words.length);
-
-// Identity(3)
+Identity.unit("Monads are awesome!")          // Identity("Monads are awesome!")
+  .bind(str => Identity.unit(str.split(" "))) // Identity(["Monads", "are", "awesome!"])
+  .map(words => words.length)                 // Identity(3)
+  .extract()                                  // 3
 ```
 
 ### Maybe (Just | Nothing)

@@ -21,6 +21,9 @@ ava_1.default("Identity.map allows for chaining underlaying value transformation
         .map(len => len * 2);
     t.deepEqual(actual, monads_1.Identity.of(6));
 });
+ava_1.default("Identity implements Comonad", t => {
+    t.is(monads_1.Identity.of("Comonad").extract(), "Comonad");
+});
 ava_1.default("Identity implements .toString() method", t => {
     t.is(monads_1.Identity.of(6).toString(), "Identity(6)");
     t.is(monads_1.Identity.of("foo").toString(), "Identity(\"foo\")");
@@ -79,10 +82,10 @@ ava_1.default("Nothing implements .toString() method", t => {
 });
 ava_1.default("Nothing obey monad laws", t => {
     const f = (word) => monads_1.Just.of(word.length);
-    const f1 = (word) => new monads_1.Nothing();
+    const f1 = (word) => monads_1.Nothing.unit();
     const g = (len) => monads_1.Just.of(len * 2);
-    const m = new monads_1.Nothing();
-    t.deepEqual(new monads_1.Nothing().bind(f1), f1("foo"));
+    const m = monads_1.Nothing.unit();
+    t.deepEqual(monads_1.Nothing.unit().bind(f1), f1("foo"));
     t.deepEqual(m.bind(monads_1.Just.of), m);
     t.deepEqual(m.bind(f).bind(g), m.bind(x => f(x).bind(g)));
 });
@@ -320,9 +323,9 @@ ava_1.default("List implements .toString() method", t => {
 ava_1.default("List obey monad laws", t => {
     const f = (iterable) => monads_1.List.of(iterable);
     const g = (iterable) => monads_1.List.of(Array.from(iterable).map(x => x + 1));
-    const m = monads_1.Just.of([1, 2, 3]);
+    const m = monads_1.List.of([1, 2, 3]);
     t.deepEqual(monads_1.List.of([1, 2, 3]).bind(f), f([1, 2, 3]));
-    t.deepEqual(m.bind(monads_1.Just.of), m);
+    t.deepEqual(m.bind(monads_1.List.of), m);
     t.deepEqual(m.bind(f).bind(g), m.bind(x => f(x).bind(g)));
 });
 //# sourceMappingURL=monads.test.js.map

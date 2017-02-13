@@ -1,6 +1,10 @@
 import * as deepEqual from "deep-equal";
 
-export class Identity<T> {
+export interface Comonad<T> {
+  extract(): T;
+}
+
+export class Identity<T> implements Comonad<T> {
   public static of = Identity.unit;
 
   public static unit<T>(value: T) {
@@ -15,6 +19,10 @@ export class Identity<T> {
 
   public map<U>(transform: (value: T) => U): Identity<U> {
     return Identity.unit(transform(this._value));
+  }
+
+  public extract(): T {
+    return this._value;
   }
 
   public toString() {
