@@ -5,8 +5,6 @@ export interface Comonad<T> {
 }
 
 export class Identity<T> implements Comonad<T> {
-  public static of = Identity.unit;
-
   public static unit<T>(value: T) {
     return new Identity<T>(value);
   }
@@ -31,15 +29,13 @@ export class Identity<T> implements Comonad<T> {
 }
 
 export class Just<T> {
-  public static of = Just.unit;
-
   public static unit<T>(value: T) {
     return new Just<T>(value);
   }
 
   constructor(private _value: T) {}
 
-  public bind<U>(transform: (value: T) => Just<U> | Nothing): Just<U> | Nothing {
+  public bind<U>(transform: (value: T) => Just<U> | Nothing<U>): Just<U> | Nothing<U> {
     try {
       return transform(this._value);
     } catch (err) {
@@ -47,7 +43,7 @@ export class Just<T> {
     }
   }
 
-  public map<U>(transform: (value: T) => U): Just<U> | Nothing {
+  public map<U>(transform: (value: T) => U): Just<U> | Nothing<U> {
     try {
       return Just.unit(transform(this._value));
     } catch (err) {
@@ -60,31 +56,27 @@ export class Just<T> {
   }
 }
 
-export class Nothing {
-  public static of = Nothing.unit;
+export class Nothing<T> {
+  public static unit<T>() {
+    return new Nothing<T>();
+  }
 
-  public static unit() {
+  public bind<U>(transform: (value: T) => Just<U> | Nothing<U>): Just<U> | Nothing<U> {
     return new Nothing();
   }
 
-  public bind<U>(transform: (value: any) => Just<U> | Nothing): Nothing {
-    return this;
-  }
-
-  public map<U>(transform: (value: any) => U): Nothing {
-    return this;
+  public map<U>(transform: (value: T) => U): Just<U> | Nothing<U> {
+    return new Nothing();
   }
 
   public toString() {
-    return "Nothing()";
+    return `Nothing()`;
   }
 }
 
-export type Maybe<T> = Just<T> | Nothing;
+export type Maybe<T> = Just<T> | Nothing<T>;
 
 export class Right<T> {
-  public static of = Right.unit;
-
   public static unit<T>(value: T) {
     return new Right<T>(value);
   }
@@ -113,19 +105,17 @@ export class Right<T> {
 }
 
 export class Left<T> {
-  public static of = Left.unit;
-
   public static unit<T>(value: T) {
     return new Left<T>(value);
   }
 
   constructor(private _value: T) {}
 
-  public bind<U>(transform: (value: T) => Right<U> | Left<U>): Left<T> {
+  public bind<U>(transform: (value: T) => Right<U> | Left<U>): Left<U> {
     return this;
   }
 
-  public map<U>(transform: (value: T) => U): Left<T> {
+  public map<U>(transform: (value: T) => U): Left<U> {
     return this;
   }
 
@@ -139,8 +129,6 @@ export type Either<T> = Right<T> | Left<T>
 export type IOSideEffect = (...params: any[]) => void;
 
 export class IO {
-  public static of = IO.unit;
-
   public static unit(effect: IOSideEffect, ...params: any[]) {
     return new IO(effect, ...params);
   }
@@ -170,8 +158,6 @@ export class IO {
 }
 
 export class Continuation {
-  public static of = Continuation.unit;
-
   public static unit(value: any) {
     return new Continuation(value);
   }
@@ -183,7 +169,7 @@ export class Continuation {
   }
 
   public bind(transform: (value: any) => any): Continuation {
-    return Continuation.of(this._value.then(transform));
+    return Continuation.unit(this._value.then(transform));
   }
 
   public toString() {
@@ -198,8 +184,6 @@ function *lazyMap<T, U>(iterable: Iterable<T>, transform: (elem: T) => U) {
 }
 
 export class List<T> {
-  public static of = List.unit;
-
   public static unit<T>(value: Iterable<T>) {
     return new List<T>(value);
   }
@@ -211,7 +195,7 @@ export class List<T> {
   }
 
   public map<U>(transform: (elem: T) => U): List<U> {
-    return List.of(lazyMap(this._value, transform));
+    return List.unit(lazyMap(this._value, transform));
   }
 
   public forEach(subscribe: (elem: T) => void): void {
