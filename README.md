@@ -53,7 +53,7 @@ Just.unit("Monads are awesome!")
   // Just(3)
 ```
 
-At that point it's really similar to Identity monad. Things looks different when Nothing comes in.
+At that point it's really similar to Identity monad. Things look different when Nothing comes in.
 Nothing can be explicity returned from function passed to bind or when error occures. Further
 execution is stopped. In the following example `double` is not going to be called due to `TypeError`
 throwed in `firstWordLength` when empty array is passed.
